@@ -12,7 +12,7 @@ function StoryCreate() {
     e.preventDefault();
     setPhoto(e.target.files[0]);
     const formData = new FormData();
-    formData.append("file", photo);
+    formData.append("data", photo);
     uploadImage(formData)
       .then((res) => {
         console.log(res.data);

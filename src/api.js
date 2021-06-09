@@ -101,9 +101,5 @@ export function signup(signupRequest) {
 }
 
 export function uploadImage(file) {
-  return axios.post(API_BASE_URL + "/auth/upload", file, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  return axios.post(API_BASE_URL + "/auth/upload", file, autorization);
 }

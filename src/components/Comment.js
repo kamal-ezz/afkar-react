@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import repliesFromServer from "../fakeApi/replies";
 import users from "../fakeApi/users";
-import { createReply, getReplies, getUserInfo } from "../api.js";
+import { createReply, getReplies, getUserInfo, deleteComment } from "../api.js";
 
 function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
   const [replyBox, setReplyBox] = useState(false);
@@ -24,6 +24,8 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
     loadReplies();
   }, []);
 
+  const handleCommentDelete = () => {};
+
   const getUser = (id) => {
     getUserInfo(id).then((res) => {
       return {
@@ -31,7 +33,7 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
         profilePhoto: res.data.image,
       };
 
-      console.log(res.data);
+      // console.log(res.data);
     });
   };
 
@@ -59,11 +61,11 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
         <img
           className="rounded-circle"
           style={{ width: 50, height: 50 }}
-          src={getUser(data.userId).image}
+          src={currentUser.image}
         />
-        <div className="d-flex flex-column pl-3">
+        <div className="d-flex flex-column pl-3 mb-5">
           <span>
-            <a href="#">{getUser(data.userId).name}</a>
+            <a href="#">{currentUser.username}</a>
           </span>
           <p> {data.body} </p>
           <div className="mt-n3">
@@ -76,8 +78,20 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
             </span>
             {isAuthenticated ? (
               <>
-                <a href="#">Modifier</a>
-                <a href="#">Supprimer</a>
+                <span
+                  onClick={handleReplyBox}
+                  style={{ cursor: "pointer" }}
+                  className="ml-2"
+                >
+                  Modifier
+                </span>
+                <span
+                  onClick={handleCommentDelete}
+                  style={{ cursor: "pointer" }}
+                  className="ml-2"
+                >
+                  Supprimer
+                </span>
               </>
             ) : null}
           </div>
