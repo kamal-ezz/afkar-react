@@ -103,3 +103,7 @@ export function signup(signupRequest) {
 export function uploadImage(file) {
   return axios.post(API_BASE_URL + "/auth/upload", file, autorization);
 }
+
+export function getImage() {
+  return axios.get(API_BASE_URL + "/auth/files", autorization);
+}

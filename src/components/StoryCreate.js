@@ -6,13 +6,13 @@ function StoryCreate() {
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [content, setContent] = useState("");
-  const [photo, setPhoto] = useState(null);
+  //const [photo, setPhoto] = useState(null);
 
   const addPhoto = (e) => {
     e.preventDefault();
-    setPhoto(e.target.files[0]);
+    //setPhoto(e.target.files[0]);
     const formData = new FormData();
-    formData.append("data", photo);
+    formData.append("data", e.target.files[0]);
     uploadImage(formData)
       .then((res) => {
         console.log(res.data);

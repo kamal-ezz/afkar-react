@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import repliesFromServer from "../fakeApi/replies";
 import users from "../fakeApi/users";
-import { createReply, getReplies, getUserInfo, deleteComment } from "../api.js";
+import {
+  createReply,
+  getReplies,
+  getUserInfo,
+  deleteComment,
+  deleteReply,
+} from "../api.js";
 
 function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
   const [replyBox, setReplyBox] = useState(false);
@@ -24,7 +30,11 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
     loadReplies();
   }, []);
 
-  const handleCommentDelete = () => {};
+  const handleCommentDelete = (e) => {
+    //console.log(e.target.parentNode.parentNode);
+  };
+
+  const handleReplyDelete = () => {};
 
   const getUser = (id) => {
     getUserInfo(id).then((res) => {
@@ -123,21 +133,35 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
       {replies.map((reply) => (
         <div className="d-flex" style={{ margin: "20px 0 10px 140px" }}>
           <img
-            src={getUser(reply.userId).image}
+            src={getUser(reply.userId) ? getUser(reply.userId).image : ""}
             alt={reply.owner}
             className="rounded-circle"
             style={{ width: 50, height: 50 }}
           />
           <div className="d-flex flex-column pl-3">
             <span>
-              <a href="#">{getUser(reply.userId).name}</a>
+              <a href="#">
+                {getUser(reply.userId) ? getUser(reply.userId).name : ""}
+              </a>
             </span>
             <p>{reply.body}</p>
             <div className="mt-n3">
               {isAuthenticated ? (
                 <>
-                  <a href="#">Modifier</a>
-                  <a href="#">Supprimer</a>
+                  <span
+                    onClick={handleReplyBox}
+                    style={{ cursor: "pointer" }}
+                    className="ml-2"
+                  >
+                    Modifier
+                  </span>
+                  <span
+                    onClick={handleReplyDelete}
+                    style={{ cursor: "pointer" }}
+                    className="ml-2"
+                  >
+                    Supprimer
+                  </span>
                 </>
               ) : null}
             </div>
