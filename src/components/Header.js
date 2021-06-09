@@ -3,17 +3,10 @@ import { Route } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import SearchBox from "./SearchBox";
-import { UserContext } from "../UserContext";
 import { useHistory } from "react-router-dom";
 
-function Header(props) {
-  const { user, setUser } = useContext(UserContext);
+function Header({ onLogout, isAuthenticated, currentUser }) {
   const history = useHistory();
-
-  const logoutHandler = () => {
-    setUser(0);
-    history.push("/");
-  };
 
   return (
     <header>
@@ -38,11 +31,11 @@ function Header(props) {
             <Route render={({ history }) => <SearchBox history={history} />} />
 
             <Nav className="ml-auto">
-              {user ? (
+              {isAuthenticated ? (
                 <NavDropdown
                   title={
                     <img
-                      src={user.profilePhoto}
+                      src={currentUser.profilePhoto}
                       style={{
                         width: 45,
                         height: 45,
@@ -64,7 +57,7 @@ function Header(props) {
                   <LinkContainer to="/create_story">
                     <NavDropdown.Item>Ecrire une story</NavDropdown.Item>
                   </LinkContainer>
-                  <NavDropdown.Item onClick={logoutHandler}>
+                  <NavDropdown.Item onClick={onLogout}>
                     Déconnecter
                   </NavDropdown.Item>
                 </NavDropdown>

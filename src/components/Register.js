@@ -1,31 +1,44 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Container, Form, Button, Row, Col } from "react-bootstrap";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
-import { UserContext } from "../UserContext";
+import { signup } from "../api.js";
+import { useHistory } from "react-router";
 
-const Register = ({ location, history }) => {
+const Register = ({ location, isAuthenticated }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState(null);
-
-  const { user, setUser } = useContext(UserContext);
+  const history = useHistory();
 
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       history.push("/");
     }
-  }, [history, user]);
+  }, [history, isAuthenticated]);
 
   const submitHandler = (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setMessage("Passwords do not match");
     } else {
-      console.log("submit");
+      const signupRequest = {
+        username: name,
+        email,
+        password,
+      };
+
+      signup(signupRequest)
+        .then((res) => {
+          console.log(res.data);
+          history.push("/");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   };
 

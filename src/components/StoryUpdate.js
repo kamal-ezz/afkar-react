@@ -1,8 +1,10 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Form, Button, Row, Container } from "react-bootstrap";
 import stories from "../fakeApi/stories";
+import { updateStory, getStoryDetails } from "../api.js";
+import { useHistory } from "react-router";
 
-function StoryUpdate({ match }) {
+function StoryUpdate({ match, isAuthenticated }) {
   const storyId = match.params.id;
 
   const [title, setTitle] = useState("");
@@ -10,17 +12,37 @@ function StoryUpdate({ match }) {
   const [content, setContent] = useState("");
   const [photo, setPhoto] = useState("");
 
+  const history = useHistory();
+
   const addPhoto = () => {};
 
-  const submitHandler = () => {};
+  const handleSubmit = () => {
+    const storyData = {
+      title,
+      subtitle,
+      content,
+    };
+
+    updateStory(storyId, storyData)
+      .then((res) => console.log("Story succesfully created"))
+      .catch((err) => console.log(err));
+  };
+
+  const loadStoryData = () => {
+    getStoryDetails(storyId).then((res) => {
+      setTitle(res.title);
+      setSubtitle(res.subtitle);
+      setContent(res.body);
+      setPhoto(res.storyImage);
+    });
+  };
 
   useEffect(() => {
-    const story = stories.filter((story) => story.id === storyId)[0];
-    setTitle(story.title);
-    setSubtitle(story.subtitle);
-    setContent(story.body);
-    setPhoto(story.storyImage);
-  }, [stories, storyId]);
+    if (!isAuthenticated) {
+      history.push("/login");
+    }
+    loadStoryData();
+  }, []);
 
   return (
     <Container
@@ -28,7 +50,7 @@ function StoryUpdate({ match }) {
       className="d-flex justify-content-center align-items-center flex-column"
       style={{ marginTop: 80 }}
     >
-      <Form onSumbit={submitHandler}>
+      <Form onSumbit={handleSubmit}>
         <Form.Group controlId="title">
           <Form.Label>Titre:</Form.Label>
           <Form.Control

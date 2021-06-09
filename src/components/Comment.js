@@ -1,47 +1,54 @@
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
-import { UserContext } from "../UserContext";
 import repliesFromServer from "../fakeApi/replies";
 import users from "../fakeApi/users";
+import { createReply, getReplies, getUserInfo } from "../api.js";
 
-function Comment({ data }) {
-  const { user } = useContext(UserContext);
-
+function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
   const [replyBox, setReplyBox] = useState(false);
   const [replies, setReplies] = useState([]);
-
   const [reply, setReply] = useState("");
+  const commentId = data.id;
 
-  //const [ commenter, setCommenter ] = useState({})
-
-  useEffect(() => {
-    /* const writer = users.filter( user => user.id === data.userId)
-        setCommenter(writer) */
-
-    const repliesForThisComment = repliesFromServer.filter(
-      (reply) => reply.commentId === data.id
-    );
-    setReplies(repliesForThisComment);
-  }, [users, repliesFromServer]);
-
-  const getUser = (id) => {
-    return users.filter((user) => user.id == id)[0];
+  const loadReplies = () => {
+    getReplies(commentId)
+      .then((res) => {
+        setReplies([...res.json()]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
-  const replyHandler = () => {
+  useEffect(() => {
+    loadReplies();
+  }, []);
+
+  const getUser = (id) => {
+    getUserInfo(id).then((res) => {
+      return {
+        name: res.userName,
+        profilePhoto: res.profilePhoto,
+      };
+    });
+  };
+
+  const handleReplyBox = () => {
     setReplyBox((replyBox) => !replyBox);
   };
 
-  const addReplyHandler = (e) => {
+  const handleReply = (e) => {
     e.preventDefault();
     setReplies([
       ...replies,
       {
         id: replies.length + 1,
-        owner: "yyy",
+        owner: currentUser.userName,
         body: reply,
       },
     ]);
+
+    createReply(commentId, replies);
   };
 
   return (
@@ -60,12 +67,12 @@ function Comment({ data }) {
           <div className="mt-n3">
             <span
               id={data.id}
-              onClick={replyHandler}
+              onClick={handleReplyBox}
               style={{ cursor: "pointer" }}
             >
               Repondre
             </span>
-            {user.id === data.userId ? (
+            {isAuthenticated ? (
               <>
                 <a href="#">Modifier</a>
                 <a href="#">Supprimer</a>
@@ -77,7 +84,7 @@ function Comment({ data }) {
 
       {replyBox ? (
         <form
-          onSubmit={addReplyHandler}
+          onSubmit={handleReply}
           style={{ marginLeft: 130 }}
           className="my-3"
         >
@@ -111,7 +118,7 @@ function Comment({ data }) {
             </span>
             <p>{reply.body}</p>
             <div className="mt-n3">
-              {user ? (
+              {isAuthenticated ? (
                 <>
                   <a href="#">Modifier</a>
                   <a href="#">Supprimer</a>

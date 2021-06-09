@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
 import { Form, Button, Row, Container } from "react-bootstrap";
+import { createStory } from "../api.js";
 
 function StoryCreate() {
   const [title, setTitle] = useState("");
@@ -9,7 +10,17 @@ function StoryCreate() {
 
   const addPhoto = () => {};
 
-  const submitHandler = () => {};
+  const handleSubmit = () => {
+    const storyData = {
+      title,
+      subtitle,
+      content,
+    };
+
+    createStory(storyData)
+      .then((res) => console.log("Story succesfully created"))
+      .catch((err) => console.log(err));
+  };
 
   return (
     <Container
@@ -17,7 +28,7 @@ function StoryCreate() {
       className="d-flex justify-content-center align-items-center flex-column"
       style={{ marginTop: 80 }}
     >
-      <Form onSumbit={submitHandler}>
+      <Form onSumbit={handleSubmit}>
         <Form.Group controlId="title">
           <Form.Label>Titre:</Form.Label>
           <Form.Control

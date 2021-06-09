@@ -1,67 +1,103 @@
 import { Button } from "react-bootstrap";
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Container, Row } from "react-bootstrap";
-import { UserContext } from "../UserContext";
 import Comment from "./Comment";
 import stories from "../fakeApi/stories.js";
 import commentsFromApi from "../fakeApi/comments.js";
 import savedStories from "../fakeApi/savedStories.js";
 import users from "../fakeApi/users.js";
+import { createComment, getComments, getStoryDetails, getUserInfo } from '../api.js'
 
-function Story() {
-  const [story, setStory] = useState(stories[0]);
-
+function Story({ currentUser, isAuthenticated, match }) {
+  const [story, setStory] = useState({});
   const [comments, setComments] = useState([]);
-
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
-
-  const { user } = useContext(UserContext);
-
   const [writer, setWriter] = useState({});
+  const [comment, setComment] = useState("");
+  const storyId = match.params.id
+
+
+  const loadComments = () => {
+    getComments(storyId).then(res => {
+          setComments([...res.json()])
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+
+
+  const loadStoryContent = () => {
+    getStoryDetails(storyId).then(res => {
+
+      setStory({
+        title: res.title,
+        subtitle: res.subtitle,
+        body: res.content,
+        totalLikes: res.totalLikes,
+        date: res.createdAt
+      })
+
+      const userId = res.userId;
+
+      getUserInfo(userId).then(res => {
+          setWriter({
+            name: res.userName,
+            profilePhoto: res.image
+          })
+      }).catch(err => {
+        console.log(err)
+      })
+    }).catch(err => {
+      console.log(err)
+    })
+  }
+
+
 
   useEffect(() => {
-    setComments(
-      commentsFromApi.filter((comment) => comment.storyId === story.id)
-    );
+    loadStoryContent()
+    loadComments()
 
-    let sstory;
+    /*let sstory;
     for (sstory in savedStories) {
       if (sstory.userId === user.id && sstory.id === story.id) {
         setSaved(true);
       }
-    }
+    }*/
 
-    let userr;
-    for (userr of users) {
-      if (userr.id === story.userId) setWriter(userr);
-    }
-  }, [commentsFromApi, users, savedStories, story]);
+  }, []);
 
-  const [comment, setComment] = useState("");
+ 
 
-  const likesHandler = (e) => {
+  const handleLikes = (e) => {
     e.preventDefault();
     setLiked((liked) => (liked = !liked));
-    if (!liked) setStory({ ...story, totalLikes: story.totalLikes + 1 });
-    else setStory({ ...story, totalLikes: story.totalLikes - 1 });
+    if (!liked) {
+        setStory({ ...story, totalLikes: story.totalLikes + 1 })
+        //api request
+      }
+    else { setStory({ ...story, totalLikes: story.totalLikes - 1 }) };
   };
 
-  const saveHandler = (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
     if (!saved) setSaved(true);
   };
 
-  const commentHandler = (e) => {
+  const handleComment = (e) => {
     e.preventDefault();
     setComments([
       ...comments,
       {
         id: comments.length + 1,
-        owner: "Test",
+        owner: currentUser.userName,
         body: comment,
       },
     ]);
+
+    createComment(storyId, comments).then(res => { console.log('comment created') })
+                                    .catch(err => console.log(err))
 
     console.log(e.target.value);
   };
@@ -121,7 +157,7 @@ function Story() {
           {story.body}
         </p>
 
-        {user ? (
+        {isAuthenticated ? (
           <div className="pt-5">
             <a class="btn btn-danger" href="#">
               <i class="fas fa-trash-alt"></i>
@@ -137,13 +173,13 @@ function Story() {
         )}
 
         <div className="pt-5  ml-5 d-flex">
-          <form onSubmit={likesHandler}>
+          <form onSubmit={handleLikes}>
             <Button className="p-2" type="submit" variant="warning">
               <i className="far fa-heart fa-lg mr-2"> </i>
               {story.totalLikes}
             </Button>
           </form>
-          <form className="ml-3" onSubmit={saveHandler}>
+          <form className="ml-3" onSubmit={handleSave}>
             <Button className="p-2" type="submit" variant="info">
               <i className="far fa-bookmark fa-lg bookmark mr-2"> </i>
               Sauvegarder
@@ -157,7 +193,7 @@ function Story() {
           Commentaires
         </h3>
 
-        <form className="ml-5 mt-2" onSubmit={commentHandler}>
+        <form className="ml-5 mt-2" onSubmit={handleComment}>
           <textarea
             name="content"
             placeholder="Qu'est ce que vous pensez ?"
@@ -181,7 +217,7 @@ function Story() {
         </form>
 
         {comments.map((comment) => (
-          <Comment data={comment} />
+          <Comment data={comment} currentUser={currentUser} isAuthenticated={isAuthenticated} />
         ))}
       </Row>
     </Container>

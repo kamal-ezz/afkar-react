@@ -1,42 +1,32 @@
-import { useState, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Button, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { UserContext } from "../UserContext";
 import { Row, Col } from "react-bootstrap";
 import Paginate from "./Paginate";
+import { getAllStories } from "../api.js";
 
-function Home({ match }) {
+function Home({ match, isAuthenticated }) {
   const pageNumber = match.params.pageNumber || 1;
-
-  const { user, setUser } = useContext(UserContext);
-  const [stories, setStories] = useState([
-    {
-      id: 1,
-      title: "First",
-      subtitle: "firstsub",
-      image: "imgs/story_img.jpeg",
-    },
-    {
-      id: 2,
-      title: "Second",
-      subtitle: "secondsub",
-      image: "imgs/story_img.jpeg",
-    },
-  ]);
+  const [stories, setStories] = useState([]);
 
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(null);
 
+  useEffect(() => {
+    getAllStories()
+      .then((res) => {
+        setStories(res);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
-    <Container fluid>
-      {!user ? (
-        <div
-          style={{
+    <Container fluid  style={{
             backgroundColor: "#CEF6F2",
             height: "100vh",
-            width: "100vw",
-          }}
-        >
+            width: "100%",
+          }}>
+      {!isAuthenticated ? (
           <Row>
             <Col md={1}></Col>
             <Col md={6} xs={12} style={{ marginTop: 150 }}>
@@ -58,7 +48,6 @@ function Home({ match }) {
               />
             </Col>
           </Row>
-        </div>
       ) : (
         <>
           <div>

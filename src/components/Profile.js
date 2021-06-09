@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Row,
@@ -8,24 +8,34 @@ import {
   Button,
   Form,
 } from "react-bootstrap";
-import { UserContext } from "../UserContext";
 import Paginate from "./Paginate";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import stories from "../fakeApi/stories";
+import { getCurrentUserStories, loadUserStories } from "../api.js";
 
-function Profile() {
-  const { user } = useContext(UserContext);
+function Profile({ isAuthenticated, currentUser }) {
   const [userStories, setUserStories] = useState([]);
+  const history = useHistory();
+
+  loadUserStories = () => {
+    getCurrentUserStories()
+      .then((res) => setUserStories(res))
+      .catch((err) => console.log(err));
+  };
 
   useEffect(() => {
-    const s = stories.filter((story) => story.userId === user.id);
-    setUserStories(s);
-  }, [stories, user]);
+    if (!isAuthenticated) {
+      history.push("/login");
+    }
+    loadUserStories();
+  }, []);
 
-  const changePhotoHandler = (e) => {
+  const handlePhotoChange = (e) => {
     e.preventDefault();
     console.log("profile photo changed");
   };
+
+  const profilePhoto = currentUser.profilePhoto || "imgs/default.svg";
 
   return (
     <Container fluid>
@@ -40,13 +50,13 @@ function Profile() {
         >
           <Row>
             <Image
-              src="imgs/default.svg"
+              src={profilePhoto}
               roundedCircle
               style={{ width: 200, height: 200 }}
             />
           </Row>
           <Row>
-            <Form onSubmit={changePhotoHandler}>
+            <Form onSubmit={handlePhotoChange}>
               <Form.Group>
                 <Form.File
                   id="fileinput"
@@ -57,7 +67,7 @@ function Profile() {
             </Form>
           </Row>
           <Row style={{ marginTop: 30 }}>
-            <h2 className="text-white">Kamal Ezzarmou</h2>
+            <h2 className="text-white">{currentUser.userName}</h2>
           </Row>
         </Col>
         <Col md={8}>
@@ -65,7 +75,7 @@ function Profile() {
           <hr />
           <div style={{ marginLeft: 20 }}>
             <h3 style={{ marginTop: 50 }}>Email</h3>
-            <span style={{ fontSize: 18 }}>kamalezzarmou1999@gmail.com</span>
+            <span style={{ fontSize: 18 }}>{currentUser.email}</span>
             <h3 style={{ marginTop: 50 }}>Stories</h3>
           </div>
           <div className="d-flex">
@@ -84,7 +94,7 @@ function Profile() {
               ))
             ) : (
               <>
-                <p className="ml-4 mt-2">No stories found!!</p>
+                <p className="ml-4 mt-2">No stories yet!</p>
                 <hr />
               </>
             )}

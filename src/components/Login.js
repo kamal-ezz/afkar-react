@@ -1,19 +1,30 @@
-import { UserContext } from "../UserContext";
-import { useState, useContext } from "react";
+import { ACCESS_TOKEN, login } from "../api.js";
+import { useState } from "react";
 import Message from "./Message";
 import Loader from "./Loader";
 import { Container, Form, Button, Row, Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import users from "../fakeApi/users.js";
 
-function Login() {
-  const [email, setEmail] = useState("");
+function Login({ onLogin }) {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { user, setUser } = useContext(UserContext);
 
-  const submitHandler = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setUser(users[0]);
+    const loginRequest = {
+      username,
+      password,
+    };
+
+    login(loginRequest)
+      .then((res) => {
+        localStorage.setItem(ACCESS_TOKEN, res.authenticationToken);
+        onLogin();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -35,14 +46,14 @@ function Login() {
 
           {/*  {error && <Message variant='danger'>{error}</Message>}
 		   {loading && <Loader />} */}
-          <Form onSubmit={submitHandler}>
-            <Form.Group controlId="email">
-              <Form.Label>Address Email</Form.Label>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="username">
+              <Form.Label>Nom de l'utilisateur</Form.Label>
               <Form.Control
-                type="email"
-                placeholder="Entrer email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Entrer nom d'utilisateur"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 style={{ width: 450 }}
               ></Form.Control>
             </Form.Group>
@@ -61,12 +72,6 @@ function Login() {
             <Row className="py-3">
               <Button type="submit" variant="dark" className="mx-auto">
                 Continuer
-              </Button>
-            </Row>
-
-            <Row className="py-3">
-              <Button type="submit" variant="dark" className="mx-auto">
-                Test
               </Button>
             </Row>
           </Form>
