@@ -1,16 +1,28 @@
 import { useState, useContext } from "react";
 import { Form, Button, Row, Container } from "react-bootstrap";
-import { createStory } from "../api.js";
+import { createStory, uploadImage } from "../api.js";
 
 function StoryCreate() {
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [content, setContent] = useState("");
-  const [photo, setPhoto] = useState("");
+  const [photo, setPhoto] = useState(null);
 
-  const addPhoto = () => {};
+  const addPhoto = (e) => {
+    e.preventDefault();
+    setPhoto(e.target.files[0]);
+    const formData = new FormData();
+    formData.append("file", photo);
+    uploadImage(formData)
+      .then((res) => {
+        console.log(res.data);
+        alert("File uploaded successfully.");
+      })
+      .catch((err) => console.log(err));
+  };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     const storyData = {
       title,
       subtitle,
@@ -28,7 +40,7 @@ function StoryCreate() {
       className="d-flex justify-content-center align-items-center flex-column"
       style={{ marginTop: 80 }}
     >
-      <Form onSumbit={handleSubmit}>
+      <Form onSubmit={handleSubmit}>
         <Form.Group controlId="title">
           <Form.Label>Titre:</Form.Label>
           <Form.Control

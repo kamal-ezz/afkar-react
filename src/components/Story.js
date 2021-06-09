@@ -6,7 +6,15 @@ import stories from "../fakeApi/stories.js";
 import commentsFromApi from "../fakeApi/comments.js";
 import savedStories from "../fakeApi/savedStories.js";
 import users from "../fakeApi/users.js";
-import { createComment, getComments, getStoryDetails, getUserInfo } from '../api.js'
+import {
+  createComment,
+  getComments,
+  getStoryDetails,
+  getUserInfo,
+  deleteStory,
+} from "../api.js";
+import { useHistory } from "react-router";
+import { Link } from "react-router-dom";
 
 function Story({ currentUser, isAuthenticated, match }) {
   const [story, setStory] = useState({});
@@ -15,49 +23,53 @@ function Story({ currentUser, isAuthenticated, match }) {
   const [saved, setSaved] = useState(false);
   const [writer, setWriter] = useState({});
   const [comment, setComment] = useState("");
-  const storyId = match.params.id
-
+  const storyId = match.params.id;
+  const history = useHistory();
 
   const loadComments = () => {
-    getComments(storyId).then(res => {
-          setComments([...res.json()])
-      }).catch(err => {
-        console.log(err)
+    getComments(storyId)
+      .then((res) => {
+        if (res.data) setComments(res.data);
       })
-    }
-
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const loadStoryContent = () => {
-    getStoryDetails(storyId).then(res => {
+    getStoryDetails(storyId)
+      .then((res) => {
+        console.log(res.data);
 
-      setStory({
-        title: res.title,
-        subtitle: res.subtitle,
-        body: res.content,
-        totalLikes: res.totalLikes,
-        date: res.createdAt
-      })
+        setStory({
+          title: res.data.title,
+          subtitle: res.data.subtitle,
+          body: res.data.content,
+          totalLikes: res.data.totalLikes,
+          date: res.data.createdAt,
+        });
 
-      const userId = res.userId;
+        const userId = res.data.userId;
 
-      getUserInfo(userId).then(res => {
-          setWriter({
-            name: res.userName,
-            profilePhoto: res.image
+        getUserInfo(userId)
+          .then((res) => {
+            setWriter({
+              name: res.data.username,
+              profilePhoto: res.data.image,
+            });
           })
-      }).catch(err => {
-        console.log(err)
+          .catch((err) => {
+            console.log(err);
+          });
       })
-    }).catch(err => {
-      console.log(err)
-    })
-  }
-
-
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   useEffect(() => {
-    loadStoryContent()
-    loadComments()
+    loadStoryContent();
+    loadComments();
 
     /*let sstory;
     for (sstory in savedStories) {
@@ -65,19 +77,17 @@ function Story({ currentUser, isAuthenticated, match }) {
         setSaved(true);
       }
     }*/
-
   }, []);
-
- 
 
   const handleLikes = (e) => {
     e.preventDefault();
     setLiked((liked) => (liked = !liked));
     if (!liked) {
-        setStory({ ...story, totalLikes: story.totalLikes + 1 })
-        //api request
-      }
-    else { setStory({ ...story, totalLikes: story.totalLikes - 1 }) };
+      setStory({ ...story, totalLikes: story.totalLikes + 1 });
+      //api request
+    } else {
+      setStory({ ...story, totalLikes: story.totalLikes - 1 });
+    }
   };
 
   const handleSave = (e) => {
@@ -87,19 +97,28 @@ function Story({ currentUser, isAuthenticated, match }) {
 
   const handleComment = (e) => {
     e.preventDefault();
+
     setComments([
       ...comments,
       {
         id: comments.length + 1,
-        owner: currentUser.userName,
+        owner: currentUser.username,
         body: comment,
       },
     ]);
 
-    createComment(storyId, comments).then(res => { console.log('comment created') })
-                                    .catch(err => console.log(err))
+    createComment(storyId, comments)
+      .then((res) => {
+        console.log("comment created");
+      })
+      .catch((err) => console.log(err));
 
     console.log(e.target.value);
+  };
+
+  const handleStoryDelete = () => {
+    deleteStory(storyId).then((res) => console.log("Deleted Succesfully"));
+    history.push("/");
   };
 
   return (
@@ -158,21 +177,28 @@ function Story({ currentUser, isAuthenticated, match }) {
         </p>
 
         {isAuthenticated ? (
-          <div className="pt-5">
-            <a class="btn btn-danger" href="#">
-              <i class="fas fa-trash-alt"></i>
+          <div className="pt-5 ml-5 d-flex">
+            <Button
+              className="p-2"
+              type="submit"
+              variant="danger"
+              onClick={handleStoryDelete}
+            >
+              <i class="fas fa-trash-alt mr-2"></i>
               Supprimer
-            </a>
-            <a class="btn btn-success" href="#">
-              <i class="far fa-edit"></i>
-              Modifier
-            </a>
+            </Button>
+            <Link to={`/update_story/${storyId}`}>
+              <Button className="ml-3 p2" variant="success">
+                <i className="far fa-edit mr-2"></i>
+                Modifier
+              </Button>
+            </Link>
           </div>
         ) : (
           <></>
         )}
 
-        <div className="pt-5  ml-5 d-flex">
+        <div className="pt-3  ml-5 d-flex">
           <form onSubmit={handleLikes}>
             <Button className="p-2" type="submit" variant="warning">
               <i className="far fa-heart fa-lg mr-2"> </i>
@@ -210,14 +236,18 @@ function Story({ currentUser, isAuthenticated, match }) {
             type="submit"
             variant="dark"
             style={{ display: "block" }}
-            className="mt-1"
+            className="mt-1 mb-5"
           >
             Commenter
           </Button>
         </form>
 
         {comments.map((comment) => (
-          <Comment data={comment} currentUser={currentUser} isAuthenticated={isAuthenticated} />
+          <Comment
+            data={comment}
+            currentUser={currentUser}
+            isAuthenticated={isAuthenticated}
+          />
         ))}
       </Row>
     </Container>

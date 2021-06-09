@@ -12,21 +12,28 @@ function Home({ match, isAuthenticated }) {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(null);
 
+  const keyword = match.params.keyword;
+
   useEffect(() => {
     getAllStories()
       .then((res) => {
-        setStories(res);
+        setStories(res.data);
       })
       .catch((err) => console.log(err));
   }, []);
 
   return (
-    <Container fluid  style={{
-            backgroundColor: "#CEF6F2",
-            height: "100vh",
-            width: "100%",
-          }}>
+    <Container
+      fluid
+      style={{
+        height: "100vh",
+        width: "100%",
+      }}
+    >
       {!isAuthenticated ? (
+        <div
+          style={{ backgroundColor: "#CEF6F2", height: "100vh", width: "100%" }}
+        >
           <Row>
             <Col md={1}></Col>
             <Col md={6} xs={12} style={{ marginTop: 150 }}>
@@ -48,6 +55,7 @@ function Home({ match, isAuthenticated }) {
               />
             </Col>
           </Row>
+        </div>
       ) : (
         <>
           <div>
@@ -57,11 +65,9 @@ function Home({ match, isAuthenticated }) {
             <h3 className="pl-5 pb-3">Les derniers stories</h3>
           </div>
 
-          <hr />
-
           {stories.length !== 0 ? (
             stories.map((story) => (
-              <>
+              <div key={story.id}>
                 <Row className="py-4">
                   <Col md={1}></Col>
                   <Col md={2}>
@@ -78,14 +84,14 @@ function Home({ match, isAuthenticated }) {
                 </Row>
 
                 <hr />
-              </>
+              </div>
             ))
           ) : (
             <>
-              <div>
-                <p>No stories found!!</p>
-              </div>
-              <hr />
+              <Container>
+                <p>Aucune story trouvée !!</p>
+                <hr />
+              </Container>
             </>
           )}
         </>

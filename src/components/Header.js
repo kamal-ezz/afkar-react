@@ -35,7 +35,7 @@ function Header({ onLogout, isAuthenticated, currentUser }) {
                 <NavDropdown
                   title={
                     <img
-                      src={currentUser.profilePhoto}
+                      src={currentUser.image}
                       style={{
                         width: 45,
                         height: 45,

@@ -11,6 +11,7 @@ import Story from "./components/Story";
 import Home from "./components/Home";
 import StoryCreate from "./components/StoryCreate";
 import StoryUpdate from "./components/StoryUpdate";
+import AccountActivation from "./components/AccountActivation.js";
 
 function App() {
   const history = useHistory();
@@ -24,6 +25,7 @@ function App() {
     getCurrentUser()
       .then((res) => {
         setCurrentUser(res.data);
+        console.log(res.data);
         setIsAuthenticated(true);
         setIsLoading(false);
       })
@@ -59,7 +61,13 @@ function App() {
       <Switch>
         <Route
           path="/login"
-          render={(props) => <Login onLogin={handleLogin} {...props} />}
+          render={(props) => (
+            <Login
+              onLogin={handleLogin}
+              isAuthenticated={isAuthenticated}
+              {...props}
+            />
+          )}
         />
         <Route path="/register" component={Register} />
         <Route
@@ -74,9 +82,13 @@ function App() {
         />
         <Route
           path="/story/:id"
-          component={Story}
-          currentUser={currentUser}
-          isAuthenticated={isAuthenticated}
+          render={(props) => (
+            <Story
+              isAuthenticated={isAuthenticated}
+              currentUser={currentUser}
+              {...props}
+            />
+          )}
         />
         {/*<Route
           path="/my_stories"
@@ -85,13 +97,23 @@ function App() {
         />*/}
         <Route
           path="/create_story"
-          component={StoryCreate}
-          authenticated={isAuthenticated}
+          render={(props) => (
+            <StoryCreate
+              isAuthenticated={isAuthenticated}
+              currentUser={currentUser}
+              {...props}
+            />
+          )}
         />
         <Route
           path="/update_story/:id"
-          component={StoryUpdate}
-          authenticated={isAuthenticated}
+          render={(props) => (
+            <StoryUpdate
+              isAuthenticated={isAuthenticated}
+              currentUser={currentUser}
+              {...props}
+            />
+          )}
         />
         <Route
           path="/"
@@ -105,6 +127,8 @@ function App() {
             />
           )}
         />
+        <Route path="/activate" component={AccountActivation} />
+        <Route path="/search/:keyword" component={Home} exact />
       </Switch>
     </Router>
   );

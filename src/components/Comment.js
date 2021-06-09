@@ -13,7 +13,7 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
   const loadReplies = () => {
     getReplies(commentId)
       .then((res) => {
-        setReplies([...res.json()]);
+        setReplies(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -27,9 +27,11 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
   const getUser = (id) => {
     getUserInfo(id).then((res) => {
       return {
-        name: res.userName,
-        profilePhoto: res.profilePhoto,
+        name: res.data.username,
+        profilePhoto: res.data.image,
       };
+
+      console.log(res.data);
     });
   };
 
@@ -57,7 +59,7 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
         <img
           className="rounded-circle"
           style={{ width: 50, height: 50 }}
-          src={getUser(data.userId).profilePhoto}
+          src={getUser(data.userId).image}
         />
         <div className="d-flex flex-column pl-3">
           <span>
@@ -107,7 +109,7 @@ function Comment({ data, getCurrentUser, currentUser, isAuthenticated }) {
       {replies.map((reply) => (
         <div className="d-flex" style={{ margin: "20px 0 10px 140px" }}>
           <img
-            src={getUser(reply.userId).profilePhoto}
+            src={getUser(reply.userId).image}
             alt={reply.owner}
             className="rounded-circle"
             style={{ width: 50, height: 50 }}

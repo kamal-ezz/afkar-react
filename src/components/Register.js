@@ -29,12 +29,13 @@ const Register = ({ location, isAuthenticated }) => {
         username: name,
         email,
         password,
+        image: "imgs/default.svg",
       };
 
       signup(signupRequest)
         .then((res) => {
           console.log(res.data);
-          history.push("/");
+          history.push("/activate");
         })
         .catch((err) => {
           console.log(err);

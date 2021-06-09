@@ -11,13 +11,14 @@ import {
 import Paginate from "./Paginate";
 import { Link, useHistory } from "react-router-dom";
 import stories from "../fakeApi/stories";
-import { getCurrentUserStories, loadUserStories } from "../api.js";
+import { getCurrentUserStories, uploadImage } from "../api.js";
 
 function Profile({ isAuthenticated, currentUser }) {
   const [userStories, setUserStories] = useState([]);
+  const [photo, setPhoto] = useState(null);
   const history = useHistory();
 
-  loadUserStories = () => {
+  const loadUserStories = () => {
     getCurrentUserStories()
       .then((res) => setUserStories(res))
       .catch((err) => console.log(err));
@@ -32,10 +33,16 @@ function Profile({ isAuthenticated, currentUser }) {
 
   const handlePhotoChange = (e) => {
     e.preventDefault();
-    console.log("profile photo changed");
+    setPhoto(e.target.files[0]);
+    const formData = new FormData();
+    formData.append("file", photo);
+    uploadImage(formData)
+      .then((res) => {
+        console.log(res.data);
+        alert("File uploaded successfully.");
+      })
+      .catch((err) => console.log(err));
   };
-
-  const profilePhoto = currentUser.profilePhoto || "imgs/default.svg";
 
   return (
     <Container fluid>
@@ -50,7 +57,7 @@ function Profile({ isAuthenticated, currentUser }) {
         >
           <Row>
             <Image
-              src={profilePhoto}
+              src={currentUser.image}
               roundedCircle
               style={{ width: 200, height: 200 }}
             />
@@ -67,7 +74,7 @@ function Profile({ isAuthenticated, currentUser }) {
             </Form>
           </Row>
           <Row style={{ marginTop: 30 }}>
-            <h2 className="text-white">{currentUser.userName}</h2>
+            <h2 className="text-white">{currentUser.username}</h2>
           </Row>
         </Col>
         <Col md={8}>

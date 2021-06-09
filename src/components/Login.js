@@ -3,12 +3,18 @@ import { useState } from "react";
 import Message from "./Message";
 import Loader from "./Loader";
 import { Container, Form, Button, Row, Col } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import users from "../fakeApi/users.js";
+import { Link, useHistory } from "react-router-dom";
+import { useEffect } from "react";
 
-function Login({ onLogin }) {
+function Login({ onLogin, isAuthenticated }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  const history = useHistory();
+
+  useEffect(() => {
+    if (isAuthenticated) history.push("/");
+  }, [isAuthenticated, history]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -19,7 +25,7 @@ function Login({ onLogin }) {
 
     login(loginRequest)
       .then((res) => {
-        localStorage.setItem(ACCESS_TOKEN, res.authenticationToken);
+        localStorage.setItem(ACCESS_TOKEN, res.data.authenticationToken);
         onLogin();
       })
       .catch((err) => {
